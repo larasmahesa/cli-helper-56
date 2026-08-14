@@ -2,30 +2,31 @@ import json
 import os
 
 class ConfigLoader:
-    def __init__(self, default_config):
-        self.default_config = default_config
-        self.config = self.load_config()
+    def __init__(self, default_config_path):
+        self.default_config_path = default_config_path
+        self.config = self.load_defaults()
 
-    def load_config(self):
-        env_config = self.load_from_env()
-        file_config = self.load_from_file()
-        combined_config = self.merge_configs(env_config, file_config)
-        return {**self.default_config, **combined_config}
+    def load_defaults(self):
+        if not os.path.exists(self.default_config_path):
+            raise FileNotFoundError(f"Default config not found: {self.default_config_path}")
+        with open(self.default_config_path, 'r') as config_file:
+            return json.load(config_file)
 
-    def load_from_env(self):
-        return {key: os.getenv(key) for key in self.default_config.keys() if os.getenv(key) is not None}
+    def update_config(self, user_config_path):
+        if os.path.exists(user_config_path):
+            with open(user_config_path, 'r') as user_file:
+                user_config = json.load(user_file)
+            self.config.update(user_config)
+        else:
+            print(f"User config not found, using defaults.")
 
-    def load_from_file(self):
-        try:
-            with open('config.json') as config_file:
-                return json.load(config_file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return {}
+    def get(self, key, default=None):
+        return self.config.get(key, default)
 
-    def merge_configs(self, env_config, file_config):
-        return {**file_config, **env_config}
+    def __str__(self):
+        return json.dumps(self.config, indent=4)
 
 # Example usage:
-# default_config = {'HOST': 'localhost', 'PORT': 8080}
-# config_loader = ConfigLoader(default_config)
-# print(config_loader.config)
+# loader = ConfigLoader('defaults.json')
+# loader.update_config('user_config.json')
+# print(loader.get('key_name', 'default_value'))
