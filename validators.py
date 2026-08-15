@@ -1,32 +1,35 @@
-import re
+import time
+import requests
+from functools import wraps
 
-def validate_username(username):
-    if not isinstance(username, str) or not 3 <= len(username) <= 20:
-        raise ValueError('Username must be a string between 3 and 20 characters')
-    if not re.match('^[a-zA-Z0-9_]*$', username):
-        raise ValueError('Username can only contain alphanumeric characters and underscores')
-    return True
 
-def validate_game_choice(choice, valid_choices):
-    if choice not in valid_choices:
-        raise ValueError(f'Invalid choice. Choose from {valid_choices}')
-    return True
+def retry(max_attempts=3, delay=1):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < max_attempts:
+                try:
+                    return func(*args, **kwargs)
+                except (requests.ConnectionError, requests.Timeout) as e:
+                    attempts += 1
+                    print(f'Attempt {attempts} failed: {e}')
+                    if attempts < max_attempts:
+                        time.sleep(delay)
+            raise Exception('Max retry attempts reached')
+        return wrapper
+    return decorator
 
-def validate_positive_integer(value):
-    if not isinstance(value, int) or value <= 0:
-        raise ValueError('Value must be a positive integer')
-    return True
+@retry(max_attempts=5, delay=2)
+def fetch_data(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
 
-# Example usage in a main processing loop
+# Example usage of fetch_data
 if __name__ == '__main__':
-    valid_choices = ['easy', 'medium', 'hard']
     try:
-        username = input('Enter your username: ')
-        validate_username(username)
-        game_choice = input(f'Choose your game difficulty {valid_choices}: ')
-        validate_game_choice(game_choice, valid_choices)
-        level = int(input('Select a level (positive integer): '))
-        validate_positive_integer(level)
-        print('All inputs are valid!')
-    except ValueError as e:
-        print(f'Error: {e}')
+        data = fetch_data('https://api.example.com/data')
+        print(data)
+    except Exception as e:
+        print(f'Error fetching data: {e}')
