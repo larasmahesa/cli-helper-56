@@ -1,33 +1,25 @@
-class GameSettings:
-    DEFAULT_MAX_PLAYERS = 4
-    DEFAULT_MAP_SIZE = (100, 100)
-    DEFAULT_GAME_MODE = 'Survival'
-    DEFAULT_GAME_DIFFICULTY = 'Normal'
+class GameConstants:
+    MAX_PLAYERS = 100
+    MIN_PLAYERS = 1
+    DEFAULT_COLOR = 'blue'
+    DEFAULT_DIFFICULTY = 'normal'
+    SUPPORTED_MODES = ['single', 'multiplayer']
 
-class Color:
-    RED = '#FF0000'
-    GREEN = '#00FF00'
-    BLUE = '#0000FF'
-    WHITE = '#FFFFFF'
-    BLACK = '#000000'
+    @staticmethod
+    def validate_player_count(count):
+        if not isinstance(count, int):
+            raise ValueError('Player count must be an integer.')
+        if count < GameConstants.MIN_PLAYERS or count > GameConstants.MAX_PLAYERS:
+            raise ValueError('Player count must be between {} and {}.'.format(GameConstants.MIN_PLAYERS, GameConstants.MAX_PLAYERS))
 
-class KeyBindings:
-    UP = 'W'
-    DOWN = 'S'
-    LEFT = 'A'
-    RIGHT = 'D'
-    ATTACK = 'SPACE'
+    @staticmethod
+    def validate_game_mode(mode):
+        if mode not in GameConstants.SUPPORTED_MODES:
+            raise ValueError(f'Game mode must be one of {GameConstants.SUPPORTED_MODES}.')
 
-class ScreenResolution:
-    HD = (1280, 720)
-    FULL_HD = (1920, 1080)
-    UHD = (3840, 2160)
-
-class GameModes:
-    SINGLE_PLAYER = 'Single Player'
-    MULTI_PLAYER = 'Multiplayer'
-
-class ErrorCodes:
-    GAME_NOT_FOUND = 404
-    SERVER_ERROR = 500
-    SUCCESS = 200
+    @staticmethod
+    def get_default_settings():
+        return {
+            'color': GameConstants.DEFAULT_COLOR,
+            'difficulty': GameConstants.DEFAULT_DIFFICULTY,
+        }
