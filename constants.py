@@ -1,25 +1,32 @@
-class GameConstants:
-    MAX_PLAYERS = 100
-    MIN_PLAYERS = 1
-    DEFAULT_COLOR = 'blue'
-    DEFAULT_DIFFICULTY = 'normal'
-    SUPPORTED_MODES = ['single', 'multiplayer']
+GAMING_DATA_CONSTANTS = {
+    'MAX_PLAYERS': 100,
+    'GAME_TYPES': ['battle royale', 'team deathmatch', 'capture the flag'],
+    'PLAYER_STATISTICS': [
+        'kills',
+        'deaths',
+        'assists',
+        'score'
+    ],
+    'DEFAULT_SETTINGS': {
+        'difficulty': 'normal',
+        'graphics': 'high',
+        'audio': 70
+    },
+    'ITEM_RARITIES': {
+        'common': 0,
+        'uncommon': 1,
+        'rare': 2,
+        'epic': 3,
+        'legendary': 4
+    }
+}
 
-    @staticmethod
-    def validate_player_count(count):
-        if not isinstance(count, int):
-            raise ValueError('Player count must be an integer.')
-        if count < GameConstants.MIN_PLAYERS or count > GameConstants.MAX_PLAYERS:
-            raise ValueError('Player count must be between {} and {}.'.format(GameConstants.MIN_PLAYERS, GameConstants.MAX_PLAYERS))
+def get_game_type(index):
+    try:
+        return GAMING_DATA_CONSTANTS['GAME_TYPES'][index]
+    except IndexError:
+        return 'invalid game type'
 
-    @staticmethod
-    def validate_game_mode(mode):
-        if mode not in GameConstants.SUPPORTED_MODES:
-            raise ValueError(f'Game mode must be one of {GameConstants.SUPPORTED_MODES}.')
+def get_item_rarity(level):
+    return next((k for k, v in GAMING_DATA_CONSTANTS['ITEM_RARITIES'].items() if v == level), 'unknown')
 
-    @staticmethod
-    def get_default_settings():
-        return {
-            'color': GameConstants.DEFAULT_COLOR,
-            'difficulty': GameConstants.DEFAULT_DIFFICULTY,
-        }
